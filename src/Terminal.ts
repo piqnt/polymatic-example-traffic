@@ -7,7 +7,7 @@
 
 import * as Stage from "stage-js";
 
-import { Dataset, Driver, Middleware } from "polymatic";
+import { Binder, Driver, Middleware } from "polymatic";
 
 import { type MainContext } from "./Main";
 import { Plane } from "./Plane";
@@ -54,7 +54,7 @@ export class Terminal extends Middleware<MainContext> {
   };
 
   update = () => {
-    this.entities.data([...this.context.items]);
+    this.binder.data([...this.context.items]);
   };
 
   explode = (point: Point) => {
@@ -107,7 +107,8 @@ export class Terminal extends Middleware<MainContext> {
     },
   });
 
-  entities = Dataset.create<Plane>({
+  binder = Binder.create<Plane>({
     key: (obj) => obj.key,
-  }).addDriver(this.planeRender);
+    drivers: [this.planeRender],
+  });
 }

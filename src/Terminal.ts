@@ -19,6 +19,7 @@ export class Terminal extends Middleware<MainContext> {
     super();
     this.on("activate", this.handleActivate);
     this.on("stage-ready", this.handleStageReady);
+    this.on("frame-update", this.handleFrameRender);
   }
 
   handleActivate = () => {};
@@ -40,20 +41,13 @@ export class Terminal extends Middleware<MainContext> {
     map.appendTo(this.context.stage);
 
     this.context.stage.on("click", this.handleClick);
-    this.context.stage.tick(this.handleTick);
   };
 
   handleClick = () => {
     this.emit("user-click");
   };
 
-  handleTick = (dt: number) => {
-    this.emit("terminal-tick", dt);
-    this.update();
-    return true;
-  };
-
-  update = () => {
+  handleFrameRender = () => {
     this.binder.data([...this.context.items]);
   };
 
@@ -92,7 +86,7 @@ export class Terminal extends Middleware<MainContext> {
     update: (plane, ui) => {
       if (plane.position) {
         ui.offset(plane.position);
-        ui.rotate(plane.angle);  
+        ui.rotate(plane.angle);
         ui.visible(true);
       } else {
         ui.visible(false);

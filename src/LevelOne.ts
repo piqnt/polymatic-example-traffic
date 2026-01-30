@@ -11,6 +11,7 @@ import { type MainContext } from "./Main";
 import { Calc } from "./Calc";
 import { type Point } from "./Track";
 import { Plane } from "./Plane";
+import { type FrameLoopEvent } from "./FrameLoop";
 
 /**
  * Implements adding planes to the board with specific actions.
@@ -31,15 +32,15 @@ export class LevelOne extends Middleware<MainContext> {
   constructor() {
     super();
     this.on("activate", this.handleActivate);
-    this.on("terminal-tick", this.handleTick);
+    this.on("frame-update", this.handleFrameUpdate);
   }
 
   handleActivate = () => {
     this.context.items = [];
   };
 
-  handleTick = (dt: number) => {
-    this.globalTime += dt;
+  handleFrameUpdate = (ev: FrameLoopEvent) => {
+    this.globalTime += ev.dt;
 
     if (this.globalTime > this.nextPlaneTime) {
       const plane = this.getNextPlane();

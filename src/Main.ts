@@ -14,6 +14,7 @@ import { Terminal } from "./Terminal";
 import { Board } from "./Board";
 import { Plane } from "./Plane";
 import { LevelOne } from "./LevelOne";
+import { FrameLoop } from "./FrameLoop";
 
 export interface MainContext {
   stage?: Stage.Root;
@@ -23,6 +24,7 @@ export interface MainContext {
 export class Main extends Middleware<MainContext> {
   constructor() {
     super();
+    this.use(new FrameLoop());
     this.use(new Loader());
     this.use(new Terminal());
     this.use(new Board());

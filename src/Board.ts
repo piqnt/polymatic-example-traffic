@@ -10,6 +10,7 @@ import { Middleware } from "polymatic";
 import { type MainContext } from "./Main";
 import { Plane } from "./Plane";
 import { ActionFactory } from "./Action";
+import { type FrameLoopEvent } from "./FrameLoop";
 
 /**
  * Manages actions and movements.
@@ -21,7 +22,7 @@ export class Board extends Middleware<MainContext> {
   constructor() {
     super();
     this.on("activate", this.handleActivate);
-    this.on("terminal-tick", this.handleTick);
+    this.on("frame-update", this.handleFrameUpdate);
     this.on("user-click-plane", this.handleClickPlane);
     this.on("user-click", this.handleClick);
   }
@@ -30,15 +31,15 @@ export class Board extends Middleware<MainContext> {
     this.context.items = [];
   };
 
-  handleTick = (dt: number) => {
+  handleFrameUpdate = (ev: FrameLoopEvent) => {
     for (let i = 0; i < this.context.items.length; i++) {
       let item = this.context.items[i];
-      this.takeAction(item, dt);
+      this.takeAction(item, ev.dt);
     }
 
     for (let i = 0; i < this.context.items.length; i++) {
       let item = this.context.items[i];
-      this.moveEntity(item, dt);
+      this.moveEntity(item, ev.dt);
     }
 
     for (let i = this.context.items.length - 1; i >= 0; i--) {

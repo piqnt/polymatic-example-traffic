@@ -1,5 +1,5 @@
 export default {
-  base: '/polymatic-example-air-traffic/',
+  base: '/polymatic-example-traffic/',
   build: {
   }
 }

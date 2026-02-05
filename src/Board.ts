@@ -9,16 +9,13 @@ import { Middleware } from "polymatic";
 
 import { type MainContext } from "./Main";
 import { Plane } from "./Plane";
-import { ActionFactory } from "./Action";
 import { type FrameLoopEvent } from "./FrameLoop";
+import { stepTimeline } from "./Timeline";
 
 /**
  * Manages actions and movements.
  */
 export class Board extends Middleware<MainContext> {
-  globalTime = 0;
-  nextPlaneTime = 0;
-
   constructor() {
     super();
     this.on("activate", this.handleActivate);
@@ -34,7 +31,7 @@ export class Board extends Middleware<MainContext> {
   handleFrameUpdate = (ev: FrameLoopEvent) => {
     for (let i = 0; i < this.context.items.length; i++) {
       let item = this.context.items[i];
-      this.takeAction(item, ev.dt);
+      stepTimeline(item, ev.dt);
     }
 
     for (let i = 0; i < this.context.items.length; i++) {
@@ -48,28 +45,13 @@ export class Board extends Middleware<MainContext> {
     }
   };
 
-  takeAction = (item: Plane, dt: number) => {
-    if (!item.action && item.actions.length) {
-      const config = item.actions.shift();
-      const factory = ActionFactory[config.type];
-      if (factory) {
-        item.action = factory();
-        item.action.start(item, config as any);
-      } else {
-        console.log("Unknown action type", config.type);
-      }
-    }
-
-    item.action?.tick(item, dt);
-  };
-
   handleClick = () => {
     const plane = this.context.items?.find((item) => item.type === "plane");
     if (plane) this.handleClickPlane(plane);
   };
 
   handleClickPlane = (item: Plane) => {
-    item.action?.click?.(item);
+    item.timeline?.[0]?.["click"]?.();
   };
 
   moveEntity = (plane: Plane, dt: number) => {

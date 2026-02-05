@@ -18,13 +18,10 @@ export class Terminal extends Middleware<MainContext> {
   constructor() {
     super();
     this.on("activate", this.handleActivate);
-    this.on("stage-ready", this.handleStageReady);
     this.on("frame-update", this.handleFrameRender);
   }
 
-  handleActivate = () => {};
-
-  handleStageReady = () => {
+  handleActivate = () => {
     this.context.stage.background("#222222");
     this.context.stage.viewbox(800, 800, "out-crop").pin("align", -0.5);
     this.context.stage.MAX_ELAPSE = 20;

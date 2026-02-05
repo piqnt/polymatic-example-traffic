@@ -7,33 +7,18 @@
 
 import { type Plane } from "./Plane";
 
-import { type DelayActionConfig, DelayAction } from "./action/Delay";
-import { type EnterActionConfig, EnterAction } from "./action/Enter";
-import { type HoldActionConfig, HoldAction } from "./action/Hold";
-import { type LandActionConfig, ArrivalAction } from "./action/Arrival";
-import { type TakeoffActionConfig, DepartureAction } from "./action/Departure";
-import { type TaxiActionConfig, TaxiAction } from "./action/Taxi";
-
-export type ActionConfig =
-  | EnterActionConfig
-  | LandActionConfig
-  | TakeoffActionConfig
-  | TaxiActionConfig
-  | DelayActionConfig
-  | HoldActionConfig;
+import { type DelayConfig, DelayTask } from "./action/Delay";
+import { type EnterConfig, EnterTask } from "./action/Enter";
+import { type HoldConfig, HoldTask } from "./action/Hold";
+import { type ArrivalConfig, ArrivalAction } from "./action/Arrival";
+import { type DepartureConfig, DepartureTask } from "./action/Departure";
+import { type TaxiConfig, TaxiTask } from "./action/Taxi";
 
 export const ActionFactory = {
-  "enter": () => new EnterAction(),
-  "arrival": () => new ArrivalAction(),
-  "departure": () => new DepartureAction(),
-  "taxi": () => new TaxiAction(),
-  "delay": () => new DelayAction(),
-  "hold": () => new HoldAction(),
+  "enter": (plane: Plane, config: EnterConfig) => new EnterTask(plane, config),
+  "arrival": (plane: Plane, config: ArrivalConfig) => new ArrivalAction(plane, config),
+  "departure": (plane: Plane, config: DepartureConfig) => new DepartureTask(plane, config),
+  "taxi": (plane: Plane, config: TaxiConfig) => new TaxiTask(plane, config),
+  "delay": (plane: Plane, config: DelayConfig) => new DelayTask(plane, config),
+  "hold": (plane: Plane, config: HoldConfig) => new HoldTask(plane, config),
 };
-
-export interface Action {
-  type: string;
-  start(entity: Plane, config: ActionConfig): void;
-  tick(entity: Plane, dt: number): void;
-  click?(entity: Plane): void;
-}

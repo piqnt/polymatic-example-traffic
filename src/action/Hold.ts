@@ -6,22 +6,33 @@
  */
 
 import { Plane } from "../Plane";
+import { type Task } from "../Timeline";
 
-export interface HoldActionConfig {
+export interface HoldConfig {
   type: "hold";
 }
 
-export class HoldAction {
-  type = "hold";
+export class HoldTask implements Task {
+  name = "hold";
 
-  start = (item: Plane, d: HoldActionConfig) => {
+  started: boolean;
+  finished: boolean;
+  plane: Plane;
+  config: HoldConfig;
+
+  constructor(plane: Plane, config: HoldConfig) {
+    this.plane = plane;
+    this.config = config;
+  }
+
+  start = () => {};
+
+  step = () => {
+    this.plane.z = 0;
   };
 
-  tick = (item: Plane) => {
-    item.z = 0;
-  };
-
-  click = (item: Plane) => {
-    item.action = null;
+  click = () => {
+    // item.action = null;
+    this.finished = true;
   };
 }

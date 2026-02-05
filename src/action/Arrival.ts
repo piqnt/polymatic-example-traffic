@@ -6,44 +6,55 @@
  */
 
 import { Plane } from "../Plane";
+import { type Task } from "../Timeline";
 import { BezierPath, LinePath, Track, type Point } from "../Track";
 
-export interface LandActionConfig {
+export interface ArrivalConfig {
   type: "arrival";
   runway: [Point, Point];
 }
 
-export class ArrivalAction {
-  type = "arrival";
+export class ArrivalAction implements Task {
+  name = "arrival";
   flyPath: Track;
   taxiPath: Track;
 
-  start = (item: Plane, d: LandActionConfig) => {
+  started: boolean;
+  finished: boolean;
+  plane: Plane;
+  config: ArrivalConfig;
+
+  constructor(plane: Plane, config: ArrivalConfig) {
+    this.plane = plane;
+    this.config = config;
+  }
+
+  start = () => {
     this.flyPath = new Track(
       new BezierPath([
-        item.position,
-        item.position,
+        this.plane.position,
+        this.plane.position,
         {
-          x: 2 * d.runway[0].x - 1 * d.runway[1].x,
-          y: 2 * d.runway[0].y - 1 * d.runway[1].y,
+          x: 2 * this.config.runway[0].x - 1 * this.config.runway[1].x,
+          y: 2 * this.config.runway[0].y - 1 * this.config.runway[1].y,
         },
-        d.runway[0],
+        this.config.runway[0],
       ]),
-      0.1
+      0.1,
     );
-    this.taxiPath = new Track(new LinePath([d.runway[0], d.runway[1]]), 0.06);
+    this.taxiPath = new Track(new LinePath([this.config.runway[0], this.config.runway[1]]), 0.06);
   };
 
-  tick = (item: Plane) => {
+  step = () => {
     if (this.flyPath.progress < 1) {
-      item.z = 1;
-      item.track = this.flyPath;
+      this.plane.z = 1;
+      this.plane.track = this.flyPath;
     } else if (this.taxiPath.progress < 1) {
-      item.z = 0.5;
-      item.track = this.taxiPath;
+      this.plane.z = 0.5;
+      this.plane.track = this.taxiPath;
     } else {
-      item.track = null;
-      item.action = null;
+      this.plane.track = null;
+      this.finished = true;
     }
   };
 }

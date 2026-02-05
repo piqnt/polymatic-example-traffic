@@ -6,28 +6,40 @@
  */
 
 import { Plane } from "../Plane";
+import { type Task } from "../Timeline";
 import { LinePath, Track, type Point } from "../Track";
 
-export interface TaxiActionConfig {
+export interface TaxiConfig {
   type: "taxi";
   to: Point;
 }
 
-export class TaxiAction {
-  type = "taxi";
+export class TaxiTask implements Task {
+  name = "taxi";
   taxiPath: Track;
 
-  start = (item: Plane, d: TaxiActionConfig) => {
-    this.taxiPath = new Track(new LinePath([item.position, d.to]), 0.05);
+  started: boolean;
+  finished: boolean;
+  plane: Plane;
+  config: TaxiConfig;
+
+  constructor(plane: Plane, config: TaxiConfig) {
+    this.plane = plane;
+    this.config = config;
+  }
+
+  start = () => {
+    this.taxiPath = new Track(new LinePath([this.plane.position, this.config.to]), 0.05);
   };
 
-  tick = (item: Plane) => {
+  step = () => {
     if (this.taxiPath.progress < 1) {
-      item.z = 0;
-      item.track = this.taxiPath;
+      this.plane.z = 0;
+      this.plane.track = this.taxiPath;
     } else {
-      item.track = null;
-      item.action = null;
+      this.plane.track = null;
+      // item.action = null;
+      this.finished = true;
     }
   };
 }

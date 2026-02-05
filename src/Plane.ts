@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { type ActionConfig, type Action } from "./Action";
+import { type Task } from "./Timeline";
 import { type Track } from "./Track";
 
 export class Plane {
@@ -14,16 +14,15 @@ export class Plane {
 
   radius = 120; // used for collision
 
-  position: {x: number, y: number} = null;
+  position: { x: number; y: number } = null;
   z = 0; // elevation, for collision
   angle = 0;
   speed = 0.1;
 
   exploded = false;
 
-  actions: ActionConfig[] = [];
-  action: Action | null = null;
-
   track: Track | null;
   delete: boolean;
+
+  timeline: Task[] = [];
 }

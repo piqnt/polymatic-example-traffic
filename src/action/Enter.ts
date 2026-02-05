@@ -6,26 +6,38 @@
  */
 
 import { Plane } from "../Plane";
+import { type Task } from "../Timeline";
 import { type Point } from "../Track";
 
-export interface EnterActionConfig {
+export interface EnterConfig {
   type: "enter";
-  enter: Point;
+  location: Point;
 }
 
-export class EnterAction {
-  type = "enter";
-  enter: Point;
+export class EnterTask implements Task {
+  name = "enter";
+  location: Point;
 
-  start = (item: Plane, d: EnterActionConfig) => {
-    this.enter = d.enter;
+  started: boolean;
+  finished: boolean;
+  plane: Plane;
+  config: EnterConfig;
+
+  constructor(plane: Plane, config: EnterConfig) {
+    this.plane = plane;
+    this.config = config;
+  }
+
+  start = () => {
+    this.location = this.config.location;
   };
 
-  tick = (item: Plane) => {
-    item.position = {
-      x: this.enter.x,
-      y: this.enter.y,
-    }
-    item.action = null;
+  step = () => {
+    this.plane.position = {
+      x: this.location.x,
+      y: this.location.y,
+    };
+    // item.action = null;
+    this.finished = true;
   };
 }

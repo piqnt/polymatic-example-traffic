@@ -26,8 +26,12 @@ export class Main extends Middleware<MainContext> {
     super();
     this.use(new FrameLoop());
     this.use(new Loader());
+    this.on("stage-ready", this.handleStageReady);
+  }
+
+  handleStageReady = () => {
     this.use(new Terminal());
     this.use(new Board());
     this.use(new LevelOne());
-  }
+  };
 }

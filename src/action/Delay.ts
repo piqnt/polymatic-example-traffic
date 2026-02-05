@@ -6,25 +6,37 @@
  */
 
 import { Plane } from "../Plane";
+import { type Task } from "../Timeline";
 
-export interface DelayActionConfig {
+export interface DelayConfig {
   type: "delay";
   time: number;
 }
 
-export class DelayAction {
-  type = "delay";
+export class DelayTask implements Task {
+  name = "delay";
   time: number;
 
-  start = (item: Plane, d: DelayActionConfig) => {
-    this.time = d.time;
+  started: boolean;
+  finished: boolean;
+  plane: Plane;
+  config: DelayConfig;
+
+  constructor(plane: Plane, config: DelayConfig) {
+    this.plane = plane;
+    this.config = config;
+  }
+
+  start = () => {
+    this.time = this.config.time;
   };
 
-  tick = (item: Plane, dt: number) => {
-    item.z = 0;
+  step = (dt: number) => {
+    this.plane.z = 0;
     this.time -= dt;
     if (this.time <= 0) {
-      item.action = null;
+      // item.action = null;
+      this.finished = true;
     }
   };
 }

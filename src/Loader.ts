@@ -26,12 +26,12 @@ export class Loader extends Middleware<MainContext> {
       name: "bg",
       image: { src: bgPng, ratio: 2 },
     });
-    
+
     await Stage.atlas({
       name: "map",
       image: { src: map1Png, ratio: 2 },
     });
-    
+
     await Stage.atlas({
       image: { src: mainPng, ratio: 4 },
       ppu: 16,
@@ -40,8 +40,8 @@ export class Loader extends Middleware<MainContext> {
         explode: { x: 1, y: 0, width: 3, height: 3 },
       },
     });
-    
+
     this.context.stage = Stage.mount();
     this.emit("stage-ready");
-  }
+  };
 }

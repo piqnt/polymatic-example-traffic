@@ -6,46 +6,58 @@
  */
 
 import { Plane } from "../Plane";
+import { type Task } from "../Timeline";
 import { BezierPath, LinePath, Track, type Point } from "../Track";
 
-export interface TakeoffActionConfig {
+export interface DepartureConfig {
   type: "departure";
   runway: [Point, Point];
   exit: Point;
 }
 
-export class DepartureAction {
-  type = "departure";
+export class DepartureTask implements Task {
+  name = "departure";
   taxiPath: Track;
   flyPath: Track;
 
-  start = (item: Plane, d: TakeoffActionConfig) => {
-    this.taxiPath = new Track(new LinePath([d.runway[0], d.runway[1]]), 0.09);
+  started: boolean;
+  finished: boolean;
+  plane: Plane;
+  config: DepartureConfig;
+
+  constructor(plane: Plane, config: DepartureConfig) {
+    this.plane = plane;
+    this.config = config;
+  }
+
+  start = () => {
+    this.taxiPath = new Track(new LinePath([this.config.runway[0], this.config.runway[1]]), 0.09);
     this.flyPath = new Track(
       new BezierPath([
-        d.runway[1],
+        this.config.runway[1],
         {
-          x: 2 * d.runway[1].x - 1 * d.runway[0].x,
-          y: 2 * d.runway[1].y - 1 * d.runway[0].y,
+          x: 2 * this.config.runway[1].x - 1 * this.config.runway[0].x,
+          y: 2 * this.config.runway[1].y - 1 * this.config.runway[0].y,
         },
-        d.exit,
-        d.exit,
+        this.config.exit,
+        this.config.exit,
       ]),
-      0.1
+      0.1,
     );
   };
 
-  tick = (item: Plane) => {
+  step = () => {
     if (this.taxiPath.progress < 1) {
-      item.z = 0.5;
-      item.track = this.taxiPath;
+      this.plane.z = 0.5;
+      this.plane.track = this.taxiPath;
     } else if (this.flyPath.progress < 1) {
-      item.z = 1;
-      item.track = this.flyPath;
+      this.plane.z = 1;
+      this.plane.track = this.flyPath;
     } else {
-      item.track = null;
-      item.delete = true;
-      item.action = null;
+      this.plane.track = null;
+      this.plane.delete = true;
+      // item.action = null;
+      this.finished = true;
     }
   };
 }

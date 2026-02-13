@@ -11,6 +11,11 @@ export interface Path {
   locate: (t: number, result: Point) => Point;
 }
 
+/**
+ * Tracks an object along a path with a given speed.
+ *
+ * The track can be stepped forward in time, and it will update its position and angle accordingly.
+ */
 export class Track {
   path: Path;
   speed: number;
@@ -19,104 +24,78 @@ export class Track {
   angle = 0;
   progress = 0;
 
-  // snapshot is used to undo if step is blocked
-  private snapshot = {
-    point: { x: 0, y: 0 },
-    angle: 0,
-    progress: 0,
-  };
-
   constructor(path: Path, speed: number) {
     this.path = path;
     this.speed = speed;
   }
 
-  step = (t: number) => {
-    this.snapshot.point.x = this.point.x;
-    this.snapshot.point.y = this.point.y;
-    this.snapshot.progress = this.progress;
-
-    const e = 0.01;
-
-    this.path.locate(this.progress, this.point);
-    const x1 = this.point.x;
-    const y1 = this.point.y;
-
-    this.path.locate(this.progress + e, this.point);
-    const x2 = this.point.x;
-    const y2 = this.point.y;
-
-    const dx = x2 - x1;
-    const dy = y2 - y1;
-    const stretch = Math.sqrt(dx * dx + dy * dy) / e;
-
-    this.angle = Math.atan2(dy, dx);
-
-    this.progress += (t * this.speed) / stretch;
-
-    this.path.locate(this.progress, this.point);
-    return this.progress >= 1;
+  step = (dt: number) => {
+    this.goto(this.progress, dt);
   };
 
-  undo = () => {
-    this.point.x = this.snapshot.point.x;
-    this.point.y = this.snapshot.point.y;
-    this.angle = this.snapshot.angle;
-    this.progress = this.snapshot.progress;
+  goto = (progress: number, dt: number = 0) => {
+    const delta = { x: 0, y: 0 };
+    epsilonVelocity(delta, this.path, this.progress, 0.01);
+    const stretch = Math.sqrt(delta.x * delta.x + delta.y * delta.y);
+    this.progress = progress + (dt * this.speed) / stretch;
+    this.angle = Math.atan2(delta.y, delta.x);
+    this.path.locate(this.progress, this.point);
   };
 }
 
-export class LinePath implements Path {
-  a = { x: 0, y: 0 };
-  b = { x: 0, y: 0 };
-
-  constructor(ps: [Point, Point]) {
-    this.b.x = ps[0].x;
-    this.b.y = ps[0].y;
-    this.a.x = ps[1].x - ps[0].x;
-    this.a.y = ps[1].y - ps[0].y;
-  }
-
-  locate = (p: number, point = { x: 0, y: 0 }) => {
-    const x = this.b.x + p * this.a.x;
-    const y = this.b.y + p * this.a.y;
-    point.x = x;
-    point.y = y;
-    return point;
-  };
-}
-
+/**
+ * Provide 2-4 points for linear, quadratic, or cubic path.
+ */
 export class BezierPath implements Path {
-  a = { x: 0, y: 0 };
-  b = { x: 0, y: 0 };
-  c = { x: 0, y: 0 };
-  d = { x: 0, y: 0 };
+  points: Point[];
 
-  constructor(ps: [Point, Point, Point, Point]) {
-    if (!ps || !ps.length) {
+  constructor(points: Point[]) {
+    if (!points || !points.length) {
       throw new Error("Invalid points");
     }
 
-    this.d.x = ps[0].x;
-    this.d.y = ps[0].y;
-
-    this.c.x = 3 * (ps[1].x - ps[0].x);
-    this.c.y = 3 * (ps[1].y - ps[0].y);
-
-    this.b.x = 3 * (ps[2].x - ps[1].x) - this.c.x;
-    this.b.y = 3 * (ps[2].y - ps[1].y) - this.c.y;
-
-    this.a.x = ps[3].x - ps[0].x - this.c.x - this.b.x;
-    this.a.y = ps[3].y - ps[0].y - this.c.y - this.b.y;
+    // make a copy
+    this.points = points.map((point) => ({ x: point.x, y: point.y }));
   }
 
-  locate = (p: number, point = { x: 0, y: 0 }) => {
-    const t2 = p * p;
-    const t3 = p * p * p;
-    const x = this.a.x * t3 + this.b.x * t2 + this.c.x * p + this.d.x;
-    const y = this.a.y * t3 + this.b.y * t2 + this.c.y * p + this.d.y;
-    point.x = x;
-    point.y = y;
-    return point;
+  locate = (p: number, out = { x: 0, y: 0 }) => {
+    const ip = 1 - p;
+    if (this.points.length === 4) {
+      out.x =
+        ip * ip * ip * this.points[0].x +
+        3 * ip * ip * p * this.points[1].x +
+        3 * ip * p * p * this.points[2].x +
+        p * p * p * this.points[3].x;
+      out.y =
+        ip * ip * ip * this.points[0].y +
+        3 * ip * ip * p * this.points[1].y +
+        3 * ip * p * p * this.points[2].y +
+        p * p * p * this.points[3].y;
+    } else if (this.points.length === 3) {
+      out.x = ip * ip * this.points[0].x + 2 * ip * p * this.points[1].x + p * p * this.points[2].x;
+      out.y = ip * ip * this.points[0].y + 2 * ip * p * this.points[1].y + p * p * this.points[2].y;
+    } else if (this.points.length === 2) {
+      out.x = ip * this.points[0].x + p * this.points[1].x;
+      out.y = ip * this.points[0].y + p * this.points[1].y;
+    } else if (this.points.length === 1) {
+      out.x = this.points[0].x;
+      out.y = this.points[0].y;
+    }
+    return out;
   };
 }
+
+/** Approximates the velocity of a path at a given point by using a small epsilon. */
+const epsilonVelocity = (out: Point, path: Path, p: number, e = 0.001) => {
+  const location = { x: 0, y: 0 };
+  path.locate(p, location);
+  const x1 = location.x;
+  const y1 = location.y;
+
+  path.locate(p + e, location);
+  const x2 = location.x;
+  const y2 = location.y;
+
+  out.x = (x2 - x1) / e;
+  out.y = (y2 - y1) / e;
+};

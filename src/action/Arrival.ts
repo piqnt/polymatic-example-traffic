@@ -7,7 +7,7 @@
 
 import { Plane } from "../Plane";
 import { type Task } from "../Timeline";
-import { BezierPath, LinePath, Track, type Point } from "../Track";
+import { BezierPath, Track, type Point } from "../Track";
 
 export interface ArrivalConfig {
   type: "arrival";
@@ -30,19 +30,22 @@ export class ArrivalAction implements Task {
   }
 
   start = () => {
+    const start = this.config.runway[0];
+    const end = this.config.runway[1];
+    const delta = { x: end.x - start.x, y: end.y - start.y };
     this.flyPath = new Track(
       new BezierPath([
         this.plane.position,
         this.plane.position,
         {
-          x: 2 * this.config.runway[0].x - 1 * this.config.runway[1].x,
-          y: 2 * this.config.runway[0].y - 1 * this.config.runway[1].y,
+          x: start.x - delta.x,
+          y: start.y - delta.y,
         },
-        this.config.runway[0],
+        start,
       ]),
       0.1,
     );
-    this.taxiPath = new Track(new LinePath([this.config.runway[0], this.config.runway[1]]), 0.06);
+    this.taxiPath = new Track(new BezierPath([start, end]), 0.06);
   };
 
   step = () => {

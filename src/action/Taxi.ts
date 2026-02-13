@@ -7,7 +7,7 @@
 
 import { Plane } from "../Plane";
 import { type Task } from "../Timeline";
-import { LinePath, Track, type Point } from "../Track";
+import { BezierPath, Track, type Point } from "../Track";
 
 export interface TaxiConfig {
   type: "taxi";
@@ -29,7 +29,7 @@ export class TaxiTask implements Task {
   }
 
   start = () => {
-    this.taxiPath = new Track(new LinePath([this.plane.position, this.config.to]), 0.05);
+    this.taxiPath = new Track(new BezierPath([this.plane.position, this.config.to]), 0.05);
   };
 
   step = () => {

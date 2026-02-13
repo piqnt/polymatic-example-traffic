@@ -57,6 +57,7 @@ export class Board extends Middleware<MainContext> {
   moveEntity = (plane: Plane, dt: number) => {
     if (!plane.track) return;
 
+    const undo = plane.track.progress;
     plane.track.step(dt);
 
     for (let i = 0; i < this.context.items.length; i++) {
@@ -69,7 +70,7 @@ export class Board extends Middleware<MainContext> {
       if (contact) {
         if (plane.z == 0 && other.z == 0) {
           // both on the ground, undo step
-          plane.track.undo();
+          plane.track.goto(undo, 0);
         } else {
           plane.exploded = true;
           other.exploded = true;

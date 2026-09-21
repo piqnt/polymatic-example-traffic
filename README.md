@@ -1,6 +1,6 @@
 # Air Traffic Control Game - Polymatic Example
 
-This is a demo implementation of the Air Traffic Control game using [Polymatic](https://github.com/piqnt/polymatic) framework and [Stage.js](https://github.com/piqnt/stage.js) rendering engine.
+This is a demo implementation of the Air Traffic Control game using [Polymatic](https://github.com/piqnt/polymatic) framework and [Pixi.js](https://pixijs.com/) rendering engine.
 
 [Play Live Demo](https://piqnt.github.io/polymatic-example-traffic/)
 

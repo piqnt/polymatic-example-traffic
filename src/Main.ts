@@ -5,11 +5,11 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import * as Stage from "stage-js";
+import { type Application, type Container } from "pixi.js";
 
 import { Middleware } from "polymatic";
 
-import { Loader } from "./Loader";
+import { PixiManager, type Textures } from "./PixiManager";
 import { Terminal } from "./Terminal";
 import { Board } from "./Board";
 import { Plane } from "./Plane";
@@ -17,7 +17,9 @@ import { LevelOne } from "./LevelOne";
 import { FrameLoop } from "./FrameLoop";
 
 export interface MainContext {
-  stage?: Stage.Root;
+  pixi?: Application;
+  scene?: Container;
+  textures?: Textures;
   items?: Plane[];
 }
 
@@ -25,11 +27,11 @@ export class Main extends Middleware<MainContext> {
   constructor() {
     super();
     this.use(new FrameLoop());
-    this.use(new Loader());
-    this.on("stage-ready", this.handleStageReady);
+    this.use(new PixiManager());
+    this.on("pixi-ready", this.handlePixiReady);
   }
 
-  handleStageReady = () => {
+  handlePixiReady = () => {
     this.use(new Terminal());
     this.use(new Board());
     this.use(new LevelOne());

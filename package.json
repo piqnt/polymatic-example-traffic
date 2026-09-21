@@ -20,7 +20,8 @@
     "vite-tsconfig-paths": "^5.1.4"
   },
   "dependencies": {
-    "polymatic": "^0.0.12",
-    "stage-js": "^1.0.0-alpha.23"
+    "@piqnt/transition": "^0.0.1",
+    "pixi.js": "^8.21.0",
+    "polymatic": "^0.0.12"
   }
 }
